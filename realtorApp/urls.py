@@ -3,5 +3,7 @@ from realtorApp import views
 
 
 urlpatterns = [
-    url(r'', views.index, name='index'),
+    url(r'front', views.index, name='index'),
+    url(r'update', views.update, name='update'),
+    url(r'test', views.test, name='test'),
 ]

@@ -1,5 +1,6 @@
 import requests
-from realtorApp import models.RealEstate as RE
+from realtorApp.models import RealEstate as RE
+from realtorApp.htmlParser import parseHTML
 
 
 def makeQuery(paramObject):
@@ -35,34 +36,46 @@ def getParams(pageNumber):
     return params
 
 
-def handleParsedOutput(parsedObject):
-    try:
-        listing = RE.objects.get(siteID=parsedObject['propertyID'])
-    except RE.DoesNotExist:
-        listing = RE(street=parsedObject['address']
-                     price=parsedObject['price'],
-                     postDate=parsedObject['registrationDate'],
-                     rooms=parsedObject['rooms'],
-                     area=parsedObject['area'],
-                     zip=parsedObject['zipCode']
-                     type=parsedObject['type'],
-                     description=parsedObject['description'],
-                     siteID=parsedObject['propertyID'],
-                     pictures=parsedObject['pictureURL'])
-    else:
-        if (listing.price > parsedObject['price']
-            and parsedObject['price'] != -1):
-            listing.price = parsedObject['price']
-            # TODO - notify
-    finally:
-        listing.save()
+def handleParsedOutput(parsedObjectList):
+    for parsedObject in parsedObjectList:
+        try:
+            listing = RE.objects.get(siteID=parsedObject['propertyID'])
+        except RE.DoesNotExist:
+            listing = RE(street=parsedObject['address'],
+                         price=parsedObject['price'],
+                         postDate=parsedObject['registrationDate'],
+                         rooms=parsedObject['rooms'],
+                         area=parsedObject['area'],
+                         zip=parsedObject['zipCode'],
+                         type=parsedObject['type'],
+                         description=parsedObject['description'],
+                         siteID=parsedObject['propertyID'],
+                         pictures=parsedObject['pictureURL'])
+        else:
+            if (listing.price > parsedObject['price']
+                and parsedObject['price'] != -1):
+                listing.price = parsedObject['price']
+                # TODO - notify
+        try:
+            listing.save()
+        except Exception as e:
+            raise
 
 
 def controlFlow():
     paramObject = getParams(None)
 
     queryObject = makeQuery(paramObject)
-    handleParsedOutput(queryObject)
-    for i in range(2, queryObject['numberOfPages']+1):
+    if queryObject is None:
+        return "Error connecting to API"
+
+    parsedObjectList = parseHTML(queryObject[0])
+    handleParsedOutput(parsedObjectList)
+
+    for i in range(2, parsedObjectList[0]['numberOfPages'] + 1):
         paramObject = getParams(i)
-        handleParsedOutput(makeQuery(paramObject))
+        queryObject = makeQuery(paramObject)
+        parsedObjectList = parseHTML(queryObject[0])
+        handleParsedOutput(parsedObjectList)
+
+    return "success"
