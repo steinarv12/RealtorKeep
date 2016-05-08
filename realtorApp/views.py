@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from realtorApp.queryMaker import controlFlow
 from realtorApp.models import RealEstate as RE
+from realtorApp.models import EstatePictures as EP
 
 
 def index(request):
@@ -28,3 +29,16 @@ def update(request):
 def test(request):
     print("Testing")
     return HttpResponse(status=201)
+
+
+def viewSingleProperty(request, id):
+    try:
+        re = RE.objects.get(pk=id)
+        ep = EP.objects.filter(realEstate=re)
+    except RE.DoesNotExist:
+        return HttpResponse(status=404)
+    except EP.DoesNotExist:
+        ep = None
+
+    return render(request, 'singleProperty.html', {'estates': re,
+                                                   'estatePics': ep})

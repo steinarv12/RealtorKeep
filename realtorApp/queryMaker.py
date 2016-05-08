@@ -4,7 +4,9 @@ from realtorApp.models import EstatePictures as EP
 from realtorApp.htmlParser import parseHTML
 from realtorApp.htmlParser import parseImageURLs
 from realtorApp.compareImages import computeDiff as CD
+from realtorApp.compareImages import dhash
 from datetime import datetime
+from collections import Counter
 import uuid
 from PIL import Image
 
@@ -101,15 +103,15 @@ def handleParsedOutput(parsedObjectList):
                     name = parsedObject['propertyID'] + '-' + nameEnd + '.jpg'
                     path = "estatePictures/" + name
                     try:
-                        image.save(path)
+                        image[0].save(path)
                     except Exception as e:
-                        print("first")
                         print(e)
                     finally:
-                        image.close()
+                        image[0].close()
                     try:
                         newPic = EP(estatePicture=path,
-                                    realEstate=listing)
+                                    realEstate=listing,
+                                    imageHash=image[1])
                     except Exception as e:
                         print(e)
                     try:
@@ -145,24 +147,20 @@ def isSameEstateByImage(propertyID):
     for url in imgUrls:
         image = getImage(url)
         if image is not None:
-            images.append(image)
+            images.append((image, dhash(image)))
 
-    estateIDs = EP.objects.values_list('realEstate').distinct()
-    for estateID in estateIDs:
-        same = []
-        estatePictures = EP.objects.filter(realEstate=estateID[0])
-        for estatePic in estatePictures:
-            ePic = Image.open(estatePic.estatePicture)
-            ePicWidth, ePicHeight = ePic.size
-            imageWidth, imageHeight = images[0].size
-            if (imageWidth == ePicWidth and imageHeight == ePicHeight):
-                if CD(images[0], ePic) == 0:
-                    for image in images:
-                        image.close()
-                    ePic.close()
-                    return (True, estateID[0])
-            ePic.close()
-        if same != [] and all(same):
-            return (True, estateID[0])
-
+    sameImages = []
+    for image in images:
+        try:
+            estatePic = EP.objects.get(imageHash=image[1])
+        except EP.DoesNotExist:
+            sameImages.append(False)
+        except Exception as e:
+            print(e)
+        else:
+            print("Found another with same hash")
+            sameImages.append(True)
+    sames = Counter(sameImages)
+    if sames[True] / len(sameImages) > 0.7:
+        return (True, estatePic.realEstate)
     return (False, images)

@@ -20,3 +20,4 @@ class EstatePictures(models.Model):
     realEstate = models.ForeignKey(RealEstate,
                                    on_delete=models.CASCADE)
     estatePicture = models.ImageField(upload_to='estatePictures')
+    imageHash = models.TextField(null=True)

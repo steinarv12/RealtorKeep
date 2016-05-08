@@ -20,11 +20,15 @@
             <div class="col-md-5">
                 <h3>{{ estate.street }}</h3>
                 <h4>{{ estate.zip }}</h4>
+                {% if estate.modified != None %}
+                <h5>Fyrra verð: {{ estate.previousPrice|intcomma }}</h5>
+                <h6>Uppfært: {{ estate.modified }}</h6>
+                {% endif %}
                 <h5>Verð: {{ estate.price|intcomma }}</h5>
                 <h6>Herbergi: {{ estate.rooms }}</h6>
                 <h6>Stærð: {{ estate.area }}</h6>
                 <p>{{ estate.description }}</p>
-                <a class="btn btn-primary" href="http://fasteignir.visir.is/property/{{ estate.siteID }}" target="_blank">Skoða nánar <span class="glyphicon glyphicon-chevron-right"></span></a>
+                <a class="btn btn-primary" href="{% url 'single' estate.pk %}" target="_blank">Skoða nánar <span class="glyphicon glyphicon-chevron-right"></span></a>
             </div>
         </div>
         <!-- /.row -->
