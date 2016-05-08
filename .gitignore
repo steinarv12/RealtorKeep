@@ -6,6 +6,10 @@ __pycache__/
 # Django related
 *.sqlite3
 
+# Pictures
+estatePictures/
+
+
 # C extensions
 *.so
 

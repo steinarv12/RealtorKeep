@@ -85,3 +85,13 @@ def parseHTML(html):
                              "numberOfPages": numberOfPages})
 
     return propertyList
+
+
+def parseImageURLs(html):
+    soup = BeautifulSoup(html, "html.parser")
+    pictureList = []
+    picContainer = soup.find("div", {"class": "image-tiles"})
+    pics = picContainer.find_all('img', {"class": "lazyload"})
+    for pic in pics:
+        pictureList.append(pic.get('data-src'))
+    return pictureList
