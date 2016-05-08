@@ -1,6 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
+from realtorApp.querys import makeBaseSiteQuery
 
 
 def parseHTML(html):
@@ -71,6 +72,11 @@ def parseHTML(html):
         registrationDate = registrationDate[9:]
         registrationDate = datetime.strptime(registrationDate, "%d.%m.%Y")
         squareMeters = squareMeters.replace(",", ".")
+        detailedHTML = makeBaseSiteQuery(propertyID)
+        deSoup = BeautifulSoup(detailedHTML, "html.parser")
+        deDescription = deSoup.find('div', {"class": "description"})
+        if deDescription is not None:
+            description = str(deDescription)
 
         propertyList.append({"description": description,
                              "rooms": rooms,

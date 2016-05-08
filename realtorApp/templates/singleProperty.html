@@ -1,10 +1,69 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Property {{ estates.siteID }}</title>
-</head>
-<body>
-    <p>{{ estates.description }}</p>
+{% extends 'base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% block content %}
+
+<script type="text/javascript" src="{% static "js/ninja-slider.js" %}"></script>
+
+<script type="text/javascript">
+    function lightbox(idx) {
+        //show the slider's wrapper: this is required when the transitionType has been set to "slide" in the ninja-slider.js
+        var ninjaSldr = document.getElementById("ninja-slider");
+        ninjaSldr.parentNode.style.display = "block";
+
+        nslider.init(idx);
+
+        var fsBtn = document.getElementById("fsBtn");
+        fsBtn.click();
+    }
+
+    function fsIconClick(isFullscreen) { //fsIconClick is the default event handler of the fullscreen button
+        var ninjaSldr = document.getElementById("ninja-slider");
+        ninjaSldr.parentNode.style.display = isFullscreen ? "block" : "none";
+    }
+</script>
+
+    <h2>{{ estates.street }}</h2>
+    <h3>{{ estates.zip }}</h3>
+    <h3>Verð: {{ estates.price|intcomma }}</h3>
+    {% if estate.modified != None %}
+    <h4>Fyrra verð: {{ estate.previousPrice|intcomma }}</h4>
+    <h5>Uppfært: {{ estate.modified }}</h5>
+    {% endif %}
+    <h3>Stærð: {{ estates.area }} m&#178;</h3>
+    <h3>Herbergi: {{ estates.rooms }}</h3>
+    {% autoescape off %}
+    <p class="lead" style="width: 50%;">{{ estates.description|linebreaks }}</p>
+    {% endautoescape %}
+
+    <div style="display:none;">
+        <div id="ninja-slider">
+            <div class="slider-inner">
+                <ul>
+                    {% for estatePic in estatePics %}                    
+                    <li>
+                        <a class="ns-img" href="{{MEDIA_URL}}{{ estatePic.estatePicture }}"></a>
+                        <div class="caption">
+                            <h3>{{ estates.zip }}</h3>
+                            <p>{{ estates.street }}</p>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div id="fsBtn" class="fs-icon" title="Expand/Close"></div>
+            </div>
+        </div>
+    </div>
+    <div style="max-width:80%;margin:90px auto;">
+        <h3>Myndir</h3>
+        <div class="gallery">
+            {% for estatePic in estatePics %}
+                <img src="{{MEDIA_URL}}{{ estatePic.estatePicture }}"onclick="lightbox({{ forloop.counter0 }})" style="width:auto; height:140px;" />>
+            {% endfor %}
+        </div>
+    </div>
+
     <a class="btn btn-primary" href="http://fasteignir.visir.is/property/{{ estates.siteID }}" target="_blank">Skoða nánar <span class="glyphicon glyphicon-chevron-right"></span></a>
-</body>
-</html>
+
+{% endblock %}

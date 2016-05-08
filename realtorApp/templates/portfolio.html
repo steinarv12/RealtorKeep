@@ -1,9 +1,13 @@
+{% extends 'base.html' %}
+
 {% load humanize %}
+{% block content %}
         <!-- Page Header -->
         <div class="row">
             <div class="col-lg-12">
-                <h1 class="page-header">Allar eignir
-                    <small>{{ estates|length }}</small>
+                <h1 class="page-header">Til sölu
+                    <small>25 á síðu</small>
+                    <small>{{totalNumber}} í heildina</small>
                 </h1>
             </div>
         </div>
@@ -13,7 +17,7 @@
        <!-- Project One -->
         <div class="row">
             <div class="col-md-7">
-                <a href="#">
+                <a href="{% url 'single' estate.pk %}">
                     <img class="img-responsive" src="{{ estate.pictures }}" alt="">
                 </a>
             </div>
@@ -27,7 +31,9 @@
                 <h5>Verð: {{ estate.price|intcomma }}</h5>
                 <h6>Herbergi: {{ estate.rooms }}</h6>
                 <h6>Stærð: {{ estate.area }}</h6>
-                <p>{{ estate.description }}</p>
+                {% autoescape off %}
+                <p>{{ estate.description|truncatewords_html:17 }}</p>
+                {% endautoescape %}
                 <a class="btn btn-primary" href="{% url 'single' estate.pk %}" target="_blank">Skoða nánar <span class="glyphicon glyphicon-chevron-right"></span></a>
             </div>
         </div>
@@ -41,27 +47,26 @@
         <div class="row text-center">
             <div class="col-lg-12">
                 <ul class="pagination">
+                    {% if estates.has_previous %}
                     <li>
-                        <a href="#">&laquo;</a>
+                        <a href="?page={{ estates.previous_page_number }}">&laquo;</a>
                     </li>
-                    <li class="active">
-                        <a href="#">1</a>
-                    </li>
+                    {% endif %}
+                    {% for i in estates.paginator.page_range %}
+                        {% if forloop.counter == estates.number %}
+                        <li class="active">
+                        {% else %}
+                        <li>
+                        {% endif %}
+                            <a href="?page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                        
+                        </li>
+                    {% endfor %}
+                    {% if estates.has_next %}
                     <li>
-                        <a href="#">2</a>
+                        <a href="?page={{ estates.next_page_number }}">&raquo;</a>
                     </li>
-                    <li>
-                        <a href="#">3</a>
-                    </li>
-                    <li>
-                        <a href="#">4</a>
-                    </li>
-                    <li>
-                        <a href="#">5</a>
-                    </li>
-                    <li>
-                        <a href="#">&raquo;</a>
-                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -78,3 +83,4 @@
             </div>
             <!-- /.row -->
         </footer>
+{% endblock %}

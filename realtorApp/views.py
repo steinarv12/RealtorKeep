@@ -1,13 +1,26 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from realtorApp.queryMaker import controlFlow
 from realtorApp.models import RealEstate as RE
 from realtorApp.models import EstatePictures as EP
 
 
 def index(request):
-    query_results = RE.objects.all()
-    return render(request, 'base.html', {'estates': query_results})
+    estates_list = RE.objects.all()
+    totalNumber = len(estates_list)
+    paginator = Paginator(estates_list, 25)
+    page = request.GET.get('page')
+
+    try:
+        estates = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        estates = paginator.page(1)
+    except EmptyPage:
+        estates = paginator.page(paginator.num_pages)
+    return render(request, 'portfolio.html', {'estates': estates,
+                                              'totalNumber': totalNumber})
 
 
 def update(request):

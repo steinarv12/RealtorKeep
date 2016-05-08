@@ -3,30 +3,12 @@ from realtorApp.models import RealEstate as RE
 from realtorApp.models import EstatePictures as EP
 from realtorApp.htmlParser import parseHTML
 from realtorApp.htmlParser import parseImageURLs
-from realtorApp.compareImages import computeDiff as CD
 from realtorApp.compareImages import dhash
+from realtorApp.querys import makeBaseSiteQuery, makePropertyQuery
 from datetime import datetime
 from collections import Counter
 import uuid
 from PIL import Image
-
-
-def makePropertyQuery(paramObject):
-    r = requests.get("http://fasteignir.visir.is/ajaxsearch/getresults",
-                     params=paramObject)
-    if r.status_code == 200:
-        return (r.text, r.url)
-    else:
-        return None
-
-
-def makeBaseSiteQuery(id):
-    baseUrl = "http://fasteignir.visir.is/property/" + id
-    r = requests.get(baseUrl)
-    if r.status_code == 200:
-        return r.text
-    else:
-        return None
 
 
 def getImage(url):
@@ -101,7 +83,7 @@ def handleParsedOutput(parsedObjectList):
                 for image in isSameEstate[1]:
                     nameEnd = str(uuid.uuid1())
                     name = parsedObject['propertyID'] + '-' + nameEnd + '.jpg'
-                    path = "estatePictures/" + name
+                    path = "media/estatePictures/" + name
                     try:
                         image[0].save(path)
                     except Exception as e:
